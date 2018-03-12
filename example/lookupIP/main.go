@@ -1,20 +1,37 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
 	"github.com/haxii/tdns"
 )
 
+var (
+	rpc    = flag.String("rpc", "127.0.0.1:8090", "rpc server addr")
+	host   = flag.String("host", "", "host to resolve")
+	peerIP = flag.String("peerIP", "61.135.169.125", "peer ip")
+	help   = flag.Bool("h", false, "help usage")
+)
+
 func main() {
-	c := tDNS.ConnectClient("127.0.0.1:8090")
+	flag.Parse()
+	if *help {
+		flag.Usage()
+		return
+	}
+
+	if *rpc == "" || *host == "" {
+		log.Fatalln("rpc or host is empty")
+	}
+
+	c := tdns.ConnectClient(*rpc)
 	defer c.Close()
 
-	var name = "www.google.com"
-	res, err := c.LookupIPAddr("61.135.169.125", name)
+	res, err := c.LookupIPAddr(*peerIP, *host)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Printf("%s-->%+v\n", name, res)
+	fmt.Printf("%s-->%+v\n", *host, res)
 }

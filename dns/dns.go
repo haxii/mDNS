@@ -24,10 +24,12 @@ func LookupIPOnConn(conn net.Conn, host string) ([]net.IPAddr, error) {
 
 	ips := []net.IPAddr{}
 	for _, answer := range r.Answer {
-		a := answer.(*dns.A)
-		if a.Hdr.Rrtype == dns.TypeA {
-			ips = append(ips, net.IPAddr{IP: a.A})
+		header := answer.Header()
+		if header.Rrtype != dns.TypeA {
+			continue
 		}
+		a := answer.(*dns.A)
+		ips = append(ips, net.IPAddr{IP: a.A})
 	}
 
 	return ips, err

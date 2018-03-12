@@ -1,10 +1,10 @@
-package tDNS
+package tdns
 
 import (
 	"errors"
 	"net"
 
-	"github.com/haxii/tdns/model/rpc"
+	"github.com/haxii/tdns/proxy"
 	"github.com/valyala/gorpc"
 )
 
@@ -22,6 +22,7 @@ func ConnectClient(addr string) *Client {
 	d := gorpc.NewDispatcher()
 	d.AddFunc("LookupIPAddr", LookupIPAddrs)
 	d.AddFunc("SetProxyInfo", SetProxyInfo)
+	d.AddFunc("ListProxyInfo", ListProxyInfo)
 	dc := d.NewFuncClient(c)
 	client := &Client{
 		c:  c,
@@ -38,7 +39,7 @@ func (c *Client) Close() {
 //LookupIPAddr call "LookupIPAddr" rpc
 //return IPAddr slice and err
 func (c *Client) LookupIPAddr(ip, domain string) ([]net.IPAddr, error) {
-	req := &rpc.LookupIPRequest{
+	req := &LookupIPRequest{
 		IP:   ip,
 		Host: domain,
 	}
@@ -55,7 +56,7 @@ func (c *Client) LookupIPAddr(ip, domain string) ([]net.IPAddr, error) {
 
 //SetProxyInfo call "SetProxyInfo" rpc
 func (c *Client) SetProxyInfo(code, addr, user, pwd string) error {
-	req := &rpc.SetProxyRequest{
+	req := &SetProxyRequest{
 		Code: code,
 		Addr: addr,
 		User: user,
@@ -66,4 +67,13 @@ func (c *Client) SetProxyInfo(code, addr, user, pwd string) error {
 		return err
 	}
 	return nil
+}
+
+//ListProxyInfo call "ListProxyInfo" rpc
+func (c *Client) ListProxyInfo() (map[string]*proxy.ProxyInfo, error) {
+	resp, err := c.dc.Call("ListProxyInfo", nil)
+	if resp != nil {
+		return resp.(map[string]*proxy.ProxyInfo), err
+	}
+	return nil, err
 }

@@ -27,7 +27,7 @@ func main() {
 		log.Fatalln("rpc or code or addr is empty")
 	}
 
-	c := tDNS.ConnectClient(*rpc)
+	c := tdns.ConnectClient(*rpc)
 	defer c.Close()
 
 	err := c.SetProxyInfo(*code, *addr, *user, *pwd)
