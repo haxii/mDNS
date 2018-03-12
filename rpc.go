@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"time"
 
@@ -49,8 +48,8 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 		return nil, err
 	}
 	//get ips from db
-	key := getHostIPsKey(req.Host, countryCode)
-	bs, err := badger.Get(key)
+	ipskey := getHostIPsKey(req.Host, countryCode)
+	bs, err := badger.Get(ipskey)
 	if bs != nil {
 		ips := make([]net.IPAddr, 1)
 		err = json.Unmarshal(bs, &ips)
@@ -61,11 +60,10 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 	}
 
 	// resove dns via proxy
-	client := defaultServer.proxyMng.GetProxyClient(countryCode)
+	client := defaultProxyMng.GetProxyClient(countryCode)
 	if client == nil {
 		return nil, errors.New(fmt.Sprintf("not found socks for country(%s)", countryCode))
 	}
-
 	ips, err := client.ResoveDNS(req.Host, DNSAddr)
 	if err != nil {
 		return nil, err
@@ -79,11 +77,11 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 
 		bs, err := json.Marshal(ips)
 		if err != nil {
-			log.Println(err)
+			defaultLogger.Error("db", err, "", "")
 		}
-		err = badger.SetWithTTL(key, bs, ipsTTL)
+		err = badger.SetWithTTL(ipskey, bs, ipsTTL)
 		if err != nil {
-			log.Println(err)
+			defaultLogger.Error("db", err, "", "")
 		}
 	}()
 
@@ -95,13 +93,13 @@ func SetProxyInfo(req *SetProxyRequest) error {
 	if len(req.Code) == 0 || len(req.Addr) == 0 {
 		return errors.New("code or addr is empty")
 	}
-	defaultServer.proxyMng.SetProxy(req.Code, req.Addr, req.User, req.Pwd)
-	return nil
+	err := defaultProxyMng.SetProxy(req.Code, req.Addr, req.User, req.Pwd)
+	return err
 }
 
 //ListProxyInfo rpc function
 func ListProxyInfo() (map[string]*proxy.ProxyInfo, error) {
-	return defaultServer.proxyMng.GetProxys()
+	return defaultProxyMng.GetProxys()
 }
 
 func getHostIPsKey(host, countryCode string) []byte {

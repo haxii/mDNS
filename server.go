@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	hlog "github.com/haxii/log"
 	"github.com/haxii/tdns/db/badger"
 	"github.com/haxii/tdns/db/geoip"
 	"github.com/haxii/tdns/proxy"
@@ -13,15 +14,16 @@ import (
 
 var (
 	DNSAddr = "8.8.8.8:53"
-)
 
-var defaultServer *Server
+	defaultServer   *Server
+	defaultLogger   *hlog.ZeroLogger
+	defaultProxyMng *proxy.ProxyManager
+	defaultConfig   *Config
+)
 
 type Server struct {
 	//rpc server
 	rpcServer *gorpc.Server
-	//proxy manager
-	proxyMng *proxy.ProxyManager
 }
 
 //Serve init server and listen on addr
@@ -45,24 +47,36 @@ func (s *Server) Init() {
 	//set dns server addr
 	DNSAddr = defaultConfig.DNSServer
 
-	//init geoip db
-	err := geoip.InitDB(defaultConfig.IPDB)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	//init badger db
-	err = badger.InitDB(defaultConfig.BadgerDir, defaultConfig.BadgerValueDir)
+	var err error
+	defaultLogger, err = hlog.MakeZeroLogger(false, defaultConfig.LogDir, "tdns")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	//init geoip db
+	err = geoip.InitDB(defaultConfig.IPDB)
+	if err != nil {
+		defaultLogger.Error("server", err, "", "")
+	}
+	//init badger db
+	err = badger.InitDB(defaultConfig.BadgerDir, defaultConfig.BadgerValueDir)
+	if err != nil {
+		defaultLogger.Error("server", err, "", "")
+	}
+
 	//config proxy
-	s.proxyMng = proxy.NewProxyManager()
-	s.proxyMng.LoadProxys()
+	defaultProxyMng = proxy.NewProxyManager()
+	err = defaultProxyMng.LoadProxys()
+	if err != nil {
+		defaultLogger.Error("server", err, "", "")
+	}
 }
 
 //Serve
 func (s *Server) Serve() {
 	s.rpcServer = NewRpcServer(defaultConfig.ListenAddr)
-	defaultServer.rpcServer.Serve()
+	err := s.rpcServer.Serve()
+	if err != nil {
+		defaultLogger.Error("server", err, "", "")
+	}
 }

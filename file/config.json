@@ -7,5 +7,7 @@
 
     "BadgerDir": "./badger",                "//": "dir to store badger  data",
 
-    "BadgerValueDir": "./badger",           "//": "dir to stroe badger value log in"
+    "BadgerValueDir": "./badger",           "//": "dir to stroe badger value log in",
+
+    "LogDir": "./log",                      "//": "dir to store badger  data"
 }
