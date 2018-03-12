@@ -23,6 +23,15 @@ func InitDB(dir, valueDir string) error {
 	return nil
 }
 
+func CloseDB() error {
+	var err error
+	if db != nil {
+		err = db.Close()
+		db = nil
+	}
+	return err
+}
+
 func Set(key, val []byte) error {
 	return db.Update(func(txn *badger.Txn) error {
 		err := txn.Set(key, val)

@@ -27,7 +27,7 @@ type Server struct {
 }
 
 //Serve init server and listen on addr
-func Serve(config string) {
+func Serve(config string) error {
 	buf, err := ioutil.ReadFile(config)
 	if err != nil {
 		log.Fatalln(err)
@@ -39,7 +39,17 @@ func Serve(config string) {
 	}
 	defaultServer = &Server{}
 	defaultServer.Init()
-	defaultServer.Serve()
+
+	return defaultServer.Serve()
+}
+
+func StopServer() {
+	defaultServer.rpcServer.Stop()
+	geoip.CloseDB()
+	badger.CloseDB()
+	defaultProxyMng.Reset()
+	defaultProxyMng = nil
+	defaultServer = nil
 }
 
 //Init
@@ -57,11 +67,13 @@ func (s *Server) Init() {
 	err = geoip.InitDB(defaultConfig.IPDB)
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
+		log.Fatalln(err)
 	}
 	//init badger db
 	err = badger.InitDB(defaultConfig.BadgerDir, defaultConfig.BadgerValueDir)
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
+		log.Fatalln(err)
 	}
 
 	//config proxy
@@ -73,10 +85,11 @@ func (s *Server) Init() {
 }
 
 //Serve
-func (s *Server) Serve() {
+func (s *Server) Serve() error {
 	s.rpcServer = NewRpcServer(defaultConfig.ListenAddr)
-	err := s.rpcServer.Serve()
+	err := s.rpcServer.Start()
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
 	}
+	return err
 }

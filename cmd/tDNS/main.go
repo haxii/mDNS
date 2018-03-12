@@ -18,5 +18,7 @@ func main() {
 		return
 	}
 
+	stop := make(chan struct{})
 	tdns.Serve(*config)
+	<-stop
 }

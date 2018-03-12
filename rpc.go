@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"runtime/debug"
 	"time"
 
 	"github.com/haxii/tdns/db/badger"
@@ -72,16 +73,18 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 	//async save data to db
 	go func() {
 		defer func() {
-			recover()
+			if r := recover(); r != nil {
+				defaultLogger.Error("rpc", nil, "%v\n%s", r, debug.Stack())
+			}
 		}()
 
 		bs, err := json.Marshal(ips)
 		if err != nil {
-			defaultLogger.Error("db", err, "", "")
+			defaultLogger.Error("rpc", err, "", "")
 		}
 		err = badger.SetWithTTL(ipskey, bs, ipsTTL)
 		if err != nil {
-			defaultLogger.Error("db", err, "", "")
+			defaultLogger.Error("rpc", err, "", "")
 		}
 	}()
 

@@ -8,17 +8,26 @@ import (
 )
 
 var (
-	geoipDb *geoip2.Reader
+	db *geoip2.Reader
 )
 
 //InitDB init geoip db
 func InitDB(dbFile string) error {
-	db, err := geoip2.Open(dbFile)
+	_db, err := geoip2.Open(dbFile)
 	if err != nil {
 		return err
 	}
-	geoipDb = db
+	db = _db
 	return nil
+}
+
+func CloseDB() error {
+	var err error
+	if db != nil {
+		err = db.Close()
+		db = nil
+	}
+	return err
 }
 
 //CountryCode return country isoCode of ip
@@ -27,7 +36,7 @@ func CountryCode(ip string) (string, error) {
 	if netIP == nil {
 		return "", errors.New("wrong ip string")
 	}
-	country, err := geoipDb.Country(netIP)
+	country, err := db.Country(netIP)
 	if err != nil || country == nil {
 		return "", err
 	}

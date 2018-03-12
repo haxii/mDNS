@@ -138,6 +138,18 @@ func (m *ProxyManager) GetProxys() (map[string]*ProxyInfo, error) {
 	return proxyInfos, nil
 }
 
+//Reset reset proxy client, countryCodes
+func (m *ProxyManager) Reset() {
+	m.Lock()
+	defer m.Unlock()
+
+	for _, client := range m.proxys {
+		client.Reset()
+	}
+	m.proxys = make(map[string]*ProxyClient)
+	m.countryCodes = m.countryCodes[:0]
+}
+
 func getProxyKey(code []byte) []byte {
 	return append(proxyInfoKeyPrefix, []byte(code)...)
 }

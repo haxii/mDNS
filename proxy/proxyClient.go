@@ -34,12 +34,13 @@ func newSocksClient(addr, user, pwd string) *socks5.Client {
 
 //ResoveDNS send dns request and parse response
 //return IPAddr slice and error if any
-func (c *ProxyClient) ResoveDNS(host, nameserver string) ([]net.IPAddr, error) {
-	conn, err := c.client.Dial("udp", nameserver)
-	defer conn.Close()
+func (c *ProxyClient) ResoveDNS(host, dnsServer string) ([]net.IPAddr, error) {
+	conn, err := c.client.Dial("udp", dnsServer)
 	if err != nil {
 		return nil, err
 	}
+	defer conn.Close()
+
 	ips, err := dns.LookupIPOnConn(conn, host)
 	if err != nil {
 		return nil, err
