@@ -14,6 +14,8 @@ type Config struct {
 	LogDir         string // dir to save log
 }
 
+// LoadConfig read config file, unmarshal data to config struct
+// LoadConfig returns a Config
 func LoadConfig(file string) (*Config, error) {
 	buf, err := ioutil.ReadFile(file)
 	if err != nil {

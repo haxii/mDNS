@@ -18,7 +18,7 @@ var (
 	ipsTTL = time.Hour * 72
 )
 
-//NewRpcServer new tcp rpc server
+// NewRpcServer makes a tcp rpc server
 func NewRpcServer(addr string) *gorpc.Server {
 	d := gorpc.NewDispatcher()
 	d.AddFunc("LookupIPAddr", LookupIPAddrs)
@@ -40,7 +40,8 @@ type SetProxyRequest struct {
 	OnlyTCP bool
 }
 
-//LookupIPAddrs rpc function
+// LookupIPAddrs rpc function
+// LookupIPAddrs returns ip slice and error if any
 func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 	if len(req.IP) == 0 || len(req.Host) == 0 {
 		return nil, errors.New("ip or host is empty")
@@ -77,7 +78,7 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 		return nil, err
 	}
 
-	//async save data to db
+	// async save data to db
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
@@ -99,7 +100,7 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 	return ips, nil
 }
 
-//SetProxyInfo rpc function
+// SetProxyInfo rpc function
 func SetProxyInfo(req *SetProxyRequest) error {
 	if len(req.Code) == 0 {
 		return errors.New("code or addr is empty")
@@ -113,7 +114,7 @@ func SetProxyInfo(req *SetProxyRequest) error {
 	return err
 }
 
-//ListProxyInfo rpc function
+// ListProxyInfo rpc function
 func ListProxyInfo() (map[string]*proxy.ProxyInfo, error) {
 	return defaultProxyMng.GetProxys()
 }

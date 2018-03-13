@@ -13,8 +13,8 @@ type Client struct {
 	dc *gorpc.DispatcherClient
 }
 
-//connect rpc server
-//return rpc client
+// ConnectClient connects rpc server
+// ConnectClient returns a rpc client
 func ConnectClient(addr string) *Client {
 	c := gorpc.NewTCPClient(addr)
 	c.Start()
@@ -31,13 +31,13 @@ func ConnectClient(addr string) *Client {
 	return client
 }
 
-//Close close client
+// Close close client
 func (c *Client) Close() {
 	c.c.Stop()
 }
 
-//LookupIPAddr call "LookupIPAddr" rpc
-//return IPAddr slice and err
+// LookupIPAddr calls "LookupIPAddr" rpc
+// LookupIPAddr returns IPAddr slice and err
 func (c *Client) LookupIPAddr(ip, domain string) ([]net.IPAddr, error) {
 	req := &LookupIPRequest{
 		IP:   ip,
@@ -54,7 +54,7 @@ func (c *Client) LookupIPAddr(ip, domain string) ([]net.IPAddr, error) {
 	return ipAddrs, nil
 }
 
-//SetProxyInfo call "SetProxyInfo" rpc
+// SetProxyInfo calls "SetProxyInfo" rpc
 func (c *Client) SetProxyInfo(code, addr, user, pwd string, onlyTCP bool) error {
 	req := &SetProxyRequest{
 		Code:    code,
@@ -70,7 +70,8 @@ func (c *Client) SetProxyInfo(code, addr, user, pwd string, onlyTCP bool) error 
 	return nil
 }
 
-//ListProxyInfo call "ListProxyInfo" rpc
+// ListProxyInfo calls "ListProxyInfo" rpc
+// ListProxyInfo returns proxy map, error if any
 func (c *Client) ListProxyInfo() (map[string]*proxy.ProxyInfo, error) {
 	resp, err := c.dc.Call("ListProxyInfo", nil)
 	if resp != nil {

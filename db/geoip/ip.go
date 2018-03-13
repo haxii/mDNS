@@ -11,7 +11,7 @@ var (
 	db *geoip2.Reader
 )
 
-//InitDB init geoip db
+// InitDB inits geoip db
 func InitDB(dbFile string) error {
 	_db, err := geoip2.Open(dbFile)
 	if err != nil {
@@ -21,6 +21,7 @@ func InitDB(dbFile string) error {
 	return nil
 }
 
+// CloseDB closes db
 func CloseDB() error {
 	var err error
 	if db != nil {
@@ -30,7 +31,7 @@ func CloseDB() error {
 	return err
 }
 
-//CountryCode return country isoCode of ip
+// CountryCode returns country isoCode of the ip
 func CountryCode(ip string) (string, error) {
 	netIP := net.ParseIP(ip)
 	if netIP == nil {

@@ -18,20 +18,19 @@ type ProxyClient struct {
 	udpAssociateFailed int  //udp associate failed time
 }
 
-//Reset reset resource
+// Reset resets resource
 func (c *ProxyClient) SetSocksClient(client *socks5.Client) {
 	c.Reset()
 	c.client = client
 }
 
-//SetOnlyTCP set onlyTCP
+// SetOnlyTCP sets onlyTCP
 func (c *ProxyClient) SetOnlyTCP(onlyTCP bool) {
 	c.onlyTCP = onlyTCP
 }
 
-//newProxyClient new a socksClient
-//return a ProxyClient
-func newSocksClient(addr, user, pwd string) *socks5.Client {
+// NewSocksClient returns a socksClient
+func NewSocksClient(addr, user, pwd string) *socks5.Client {
 	socksClient := defaultSocksClientPool.Get()
 	socksClient.Addr = addr
 	socksClient.Username = user
@@ -40,8 +39,8 @@ func newSocksClient(addr, user, pwd string) *socks5.Client {
 	return socksClient
 }
 
-//ResoveDNS send dns request and parse response
-//return IPAddr slice and error if any
+// ResoveDNS sends dns request, parses response
+// ResoveDNS returns IPAddr slice and error if any
 func (c *ProxyClient) ResoveDNS(host, dnsServer string) ([]net.IPAddr, error) {
 	var conn net.Conn
 	var err error
@@ -81,7 +80,7 @@ func (c *ProxyClient) ResoveDNS(host, dnsServer string) ([]net.IPAddr, error) {
 	return ips, nil
 }
 
-//Reset reset resource
+// Reset resets resource
 func (c *ProxyClient) Reset() {
 	if c.client != nil {
 		defaultSocksClientPool.Put(c.client)

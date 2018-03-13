@@ -30,7 +30,7 @@ type ProxyManager struct {
 	sync.RWMutex
 }
 
-//NewProxyManager create a new ProxyManager
+// NewProxyManager creates a new ProxyManager
 func NewProxyManager() *ProxyManager {
 	return &ProxyManager{
 		proxys:       make(map[string]*ProxyClient),
@@ -38,7 +38,7 @@ func NewProxyManager() *ProxyManager {
 	}
 }
 
-//LoadProxys load proxys from db
+// LoadProxys loads proxys from db
 func (m *ProxyManager) LoadProxys() error {
 	val, err := badger.Get(countryCodeKey)
 	if err != nil {
@@ -61,7 +61,7 @@ func (m *ProxyManager) LoadProxys() error {
 		if err != nil {
 			return err
 		}
-		socks := newSocksClient(info.Addr, info.User, info.Pwd)
+		socks := NewSocksClient(info.Addr, info.User, info.Pwd)
 		if socks != nil {
 			codeStr := string(code)
 			if m.proxys[codeStr] == nil {
@@ -75,14 +75,14 @@ func (m *ProxyManager) LoadProxys() error {
 	return nil
 }
 
-//GetProxyClient return ProxyClient
+// GetProxyClient returns ProxyClient
 func (m *ProxyManager) GetProxyClient(code string) *ProxyClient {
 	m.RLock()
 	defer m.RUnlock()
 	return m.proxys[code]
 }
 
-//SetProxyClient save proxy info to db and new socks client
+// SetProxyClient saves proxy info to db and sets socks client
 func (m *ProxyManager) SetProxy(code, addr, user, pwd string, onlyTCP bool) error {
 	//save to db
 	info := &ProxyInfo{
@@ -109,7 +109,7 @@ func (m *ProxyManager) SetProxy(code, addr, user, pwd string, onlyTCP bool) erro
 	}
 
 	//set socks client
-	socks := newSocksClient(addr, user, pwd)
+	socks := NewSocksClient(addr, user, pwd)
 	if socks != nil {
 		m.Lock()
 		if m.proxys[code] == nil {
@@ -122,7 +122,7 @@ func (m *ProxyManager) SetProxy(code, addr, user, pwd string, onlyTCP bool) erro
 	return nil
 }
 
-//SetProxyOnlyTCP set proxy onlyTCP info
+// SetProxyOnlyTCP sets proxy onlyTCP info
 func (m *ProxyManager) SetProxyOnlyTCP(code string, onlyTCP bool) error {
 	bs, err := badger.Get(getProxyKey([]byte(code)))
 	if err != nil {
@@ -160,7 +160,7 @@ func (m *ProxyManager) SetProxyOnlyTCP(code string, onlyTCP bool) error {
 	return nil
 }
 
-//GetProxys return proxy map
+// GetProxys returns proxy map
 func (m *ProxyManager) GetProxys() (map[string]*ProxyInfo, error) {
 	val, err := badger.Get(countryCodeKey)
 	if err != nil {
@@ -185,7 +185,7 @@ func (m *ProxyManager) GetProxys() (map[string]*ProxyInfo, error) {
 	return proxyInfos, nil
 }
 
-//Reset reset proxy client, countryCodes
+// Reset resets proxy client, countryCodes
 func (m *ProxyManager) Reset() {
 	m.Lock()
 	defer m.Unlock()

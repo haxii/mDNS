@@ -10,7 +10,7 @@ type socksClientPool struct {
 	pool sync.Pool
 }
 
-//Get get a socksClient from pool
+// Get gets a socksClient from pool
 func (p *socksClientPool) Get() *socks5.Client {
 	v := p.pool.Get()
 	var client *socks5.Client
@@ -22,11 +22,7 @@ func (p *socksClientPool) Get() *socks5.Client {
 	return client
 }
 
-//Put put a socksClient to pool
+//Put puts a socksClient back to pool
 func (p *socksClientPool) Put(c *socks5.Client) {
-	c.Addr = ""
-	c.Username = ""
-	c.Password = ""
-	c.Debug = false
 	p.pool.Put(c)
 }
