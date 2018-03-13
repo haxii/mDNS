@@ -42,7 +42,11 @@ func NewProxyManager() *ProxyManager {
 func (m *ProxyManager) LoadProxys() error {
 	val, err := badger.Get(countryCodeKey)
 	if err != nil {
-		return err
+		if err.Error() != "Key not found" {
+			return err
+		} else {
+			return nil
+		}
 	}
 
 	codes := bytes.Split(val, countrySeparator)

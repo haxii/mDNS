@@ -1,8 +1,6 @@
 package tdns
 
 import (
-	"log"
-
 	hlog "github.com/haxii/log"
 	"github.com/haxii/tdns/db/badger"
 	"github.com/haxii/tdns/db/geoip"
@@ -28,15 +26,19 @@ type Server struct {
 func Serve(configFile string) error {
 	config, err := LoadConfig(configFile)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 	defaultConfig = config
-	defaultServer = &Server{}
-	defaultServer.Init()
+	err = Init()
+	if err != nil {
+		return err
+	}
 
+	defaultServer = &Server{}
 	return defaultServer.Serve()
 }
 
+//StopServer stop server
 func StopServer() {
 	defaultServer.rpcServer.Stop()
 	geoip.CloseDB()
@@ -47,27 +49,28 @@ func StopServer() {
 }
 
 //Init
-func (s *Server) Init() {
+func Init() error {
 	//set dns server addr
 	DNSServer = defaultConfig.DNSServer
 
+	//init logger
 	var err error
 	defaultLogger, err = hlog.MakeZeroLogger(false, defaultConfig.LogDir, "tdns")
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	//init geoip db
 	err = geoip.InitDB(defaultConfig.IPDB)
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
-		log.Fatalln(err)
+		return err
 	}
 	//init badger db
 	err = badger.InitDB(defaultConfig.BadgerDir, defaultConfig.BadgerValueDir)
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
-		log.Fatalln(err)
+		return err
 	}
 
 	//config proxy
@@ -75,7 +78,9 @@ func (s *Server) Init() {
 	err = defaultProxyMng.LoadProxys()
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
+		return err
 	}
+	return nil
 }
 
 //Serve
@@ -84,6 +89,7 @@ func (s *Server) Serve() error {
 	err := s.rpcServer.Start()
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
+		return err
 	}
-	return err
+	return nil
 }

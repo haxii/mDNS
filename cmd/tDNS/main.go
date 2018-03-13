@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 
 	"github.com/haxii/tdns"
 )
@@ -19,6 +20,9 @@ func main() {
 	}
 
 	stop := make(chan struct{})
-	tdns.Serve(*config)
+	err := tdns.Serve(*config)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	<-stop
 }
