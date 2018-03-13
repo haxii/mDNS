@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	DNSAddr = "8.8.8.8:53"
+	DNSServer = "8.8.8.8:53"
 
 	defaultServer   *Server
 	defaultLogger   *hlog.ZeroLogger
@@ -55,7 +55,7 @@ func StopServer() {
 //Init
 func (s *Server) Init() {
 	//set dns server addr
-	DNSAddr = defaultConfig.DNSServer
+	DNSServer = defaultConfig.DNSServer
 
 	var err error
 	defaultLogger, err = hlog.MakeZeroLogger(false, defaultConfig.LogDir, "tdns")

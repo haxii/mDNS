@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"net"
+	"strings"
 
 	"github.com/haxii/tdns/dns"
 	socks5 "github.com/nicdex/go-socks5"
@@ -12,13 +13,20 @@ var (
 )
 
 type ProxyClient struct {
-	client *socks5.Client
+	client             *socks5.Client
+	onlyTCP            bool //socks proxy only support tcp
+	udpAssociateFailed int  //udp associate failed time
 }
 
 //Reset reset resource
 func (c *ProxyClient) SetSocksClient(client *socks5.Client) {
 	c.Reset()
 	c.client = client
+}
+
+//SetOnlyTCP set onlyTCP
+func (c *ProxyClient) SetOnlyTCP(onlyTCP bool) {
+	c.onlyTCP = onlyTCP
 }
 
 //newProxyClient new a socksClient
@@ -35,9 +43,33 @@ func newSocksClient(addr, user, pwd string) *socks5.Client {
 //ResoveDNS send dns request and parse response
 //return IPAddr slice and error if any
 func (c *ProxyClient) ResoveDNS(host, dnsServer string) ([]net.IPAddr, error) {
-	conn, err := c.client.Dial("udp", dnsServer)
-	if err != nil {
-		return nil, err
+	var conn net.Conn
+	var err error
+	if c.onlyTCP {
+		conn, err = c.client.Dial("tcp", dnsServer)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		conn, err = c.client.Dial("udp", dnsServer)
+		if err != nil {
+			if !strings.Contains(err.Error(), "udp associate failed") {
+				return nil, err
+			}
+
+			// socks proxy can't support udp associate, then use tcp to connect
+			conn, err = c.client.Dial("tcp", dnsServer)
+			if err != nil {
+				return nil, err
+			}
+			// if udp associate continuously fail on three time, change onlyTCP true on memory
+			c.udpAssociateFailed++
+			if c.udpAssociateFailed >= 3 {
+				c.onlyTCP = true
+			}
+		} else {
+			c.udpAssociateFailed = 0
+		}
 	}
 	defer conn.Close()
 

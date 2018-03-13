@@ -33,10 +33,11 @@ type LookupIPRequest struct {
 }
 
 type SetProxyRequest struct {
-	Code string
-	Addr string
-	User string
-	Pwd  string
+	Code    string
+	Addr    string
+	User    string
+	Pwd     string
+	OnlyTCP bool
 }
 
 //LookupIPAddrs rpc function
@@ -65,7 +66,7 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 	if client == nil {
 		return nil, errors.New(fmt.Sprintf("not found socks for country(%s)", countryCode))
 	}
-	ips, err := client.ResoveDNS(req.Host, DNSAddr)
+	ips, err := client.ResoveDNS(req.Host, DNSServer)
 	if err != nil {
 		return nil, err
 	}
@@ -93,10 +94,15 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 
 //SetProxyInfo rpc function
 func SetProxyInfo(req *SetProxyRequest) error {
-	if len(req.Code) == 0 || len(req.Addr) == 0 {
+	if len(req.Code) == 0 {
 		return errors.New("code or addr is empty")
 	}
-	err := defaultProxyMng.SetProxy(req.Code, req.Addr, req.User, req.Pwd)
+	var err error
+	if len(req.Addr) == 0 {
+		err = defaultProxyMng.SetProxyOnlyTCP(req.Code, req.OnlyTCP)
+	} else {
+		err = defaultProxyMng.SetProxy(req.Code, req.Addr, req.User, req.Pwd, req.OnlyTCP)
+	}
 	return err
 }
 

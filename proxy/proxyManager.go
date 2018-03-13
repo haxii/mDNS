@@ -3,6 +3,7 @@ package proxy
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"sync"
 
 	"github.com/haxii/tdns/db/badger"
@@ -15,9 +16,10 @@ var (
 )
 
 type ProxyInfo struct {
-	Addr string
-	User string
-	Pwd  string
+	Addr    string // socks addr
+	User    string // socks user
+	Pwd     string // socks password
+	OnlyTCP bool   // only support tcp, default false
 }
 
 type ProxyManager struct {
@@ -62,6 +64,7 @@ func (m *ProxyManager) LoadProxys() error {
 				m.proxys[codeStr] = &ProxyClient{}
 			}
 			m.proxys[codeStr].SetSocksClient(socks)
+			m.proxys[codeStr].SetOnlyTCP(info.OnlyTCP)
 		}
 	}
 
@@ -76,12 +79,13 @@ func (m *ProxyManager) GetProxyClient(code string) *ProxyClient {
 }
 
 //SetProxyClient save proxy info to db and new socks client
-func (m *ProxyManager) SetProxy(code, addr, user, pwd string) error {
+func (m *ProxyManager) SetProxy(code, addr, user, pwd string, onlyTCP bool) error {
 	//save to db
 	info := &ProxyInfo{
-		Addr: addr,
-		User: user,
-		Pwd:  pwd,
+		Addr:    addr,
+		User:    user,
+		Pwd:     pwd,
+		OnlyTCP: onlyTCP,
 	}
 	bs, err := json.Marshal(info)
 	if err != nil {
@@ -108,8 +112,47 @@ func (m *ProxyManager) SetProxy(code, addr, user, pwd string) error {
 			m.proxys[code] = &ProxyClient{}
 		}
 		m.proxys[code].SetSocksClient(socks)
+		m.proxys[code].SetOnlyTCP(onlyTCP)
 		m.Unlock()
 	}
+	return nil
+}
+
+//SetProxyOnlyTCP set proxy onlyTCP info
+func (m *ProxyManager) SetProxyOnlyTCP(code string, onlyTCP bool) error {
+	bs, err := badger.Get(getProxyKey([]byte(code)))
+	if err != nil {
+		return err
+	}
+
+	info := &ProxyInfo{}
+	err = json.Unmarshal(bs, info)
+	if err != nil {
+		return err
+	}
+
+	info.OnlyTCP = onlyTCP
+	err = badger.Set(getProxyKey([]byte(code)), bs)
+	if err != nil {
+		return err
+	}
+
+	bs, err = json.Marshal(info)
+	if err != nil {
+		return err
+	}
+	err = badger.Set(getProxyKey([]byte(code)), bs)
+	if err != nil {
+		return err
+	}
+
+	if m.proxys[code] == nil {
+		return errors.New("not found proxy in proxy manager")
+	}
+	m.Lock()
+	m.proxys[code].SetOnlyTCP(onlyTCP)
+	m.Unlock()
+
 	return nil
 }
 

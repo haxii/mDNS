@@ -31,6 +31,6 @@ func main() {
 		log.Fatalln(err)
 	}
 	for code, proxy := range proxys {
-		fmt.Printf("%s: %s %s %s\n", code, proxy.Addr, proxy.User, proxy.Pwd)
+		fmt.Printf("%s: %#+v\n", code, proxy)
 	}
 }

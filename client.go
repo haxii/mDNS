@@ -55,12 +55,13 @@ func (c *Client) LookupIPAddr(ip, domain string) ([]net.IPAddr, error) {
 }
 
 //SetProxyInfo call "SetProxyInfo" rpc
-func (c *Client) SetProxyInfo(code, addr, user, pwd string) error {
+func (c *Client) SetProxyInfo(code, addr, user, pwd string, onlyTCP bool) error {
 	req := &SetProxyRequest{
-		Code: code,
-		Addr: addr,
-		User: user,
-		Pwd:  pwd,
+		Code:    code,
+		Addr:    addr,
+		User:    user,
+		Pwd:     pwd,
+		OnlyTCP: onlyTCP,
 	}
 	_, err := c.dc.Call("SetProxyInfo", req)
 	if err != nil {
