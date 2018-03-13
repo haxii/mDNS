@@ -14,13 +14,7 @@ var (
 	defaultServer   *Server
 	defaultLogger   *hlog.ZeroLogger
 	defaultProxyMng *proxy.ProxyManager
-	defaultConfig   *Config
 )
-
-type Server struct {
-	//rpc server
-	rpcServer *gorpc.Server
-}
 
 //Serve init server and listen on addr
 func Serve(configFile string) error {
@@ -28,19 +22,18 @@ func Serve(configFile string) error {
 	if err != nil {
 		return err
 	}
-	defaultConfig = config
-	err = Init()
+	err = InitServer(config)
 	if err != nil {
 		return err
 	}
 
 	defaultServer = &Server{}
-	return defaultServer.Serve()
+	return defaultServer.Start(config.ListenAddr)
 }
 
 //StopServer stop server
 func StopServer() {
-	defaultServer.rpcServer.Stop()
+	defaultServer.Stop()
 	geoip.CloseDB()
 	badger.CloseDB()
 	defaultProxyMng.Reset()
@@ -48,26 +41,26 @@ func StopServer() {
 	defaultServer = nil
 }
 
-//Init
-func Init() error {
+//InitServer
+func InitServer(config *Config) error {
 	//set dns server addr
-	DNSServer = defaultConfig.DNSServer
+	DNSServer = config.DNSServer
 
 	//init logger
 	var err error
-	defaultLogger, err = hlog.MakeZeroLogger(false, defaultConfig.LogDir, "tdns")
+	defaultLogger, err = hlog.MakeZeroLogger(false, config.LogDir, "tdns")
 	if err != nil {
 		return err
 	}
 
 	//init geoip db
-	err = geoip.InitDB(defaultConfig.IPDB)
+	err = geoip.InitDB(config.IPDB)
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
 		return err
 	}
 	//init badger db
-	err = badger.InitDB(defaultConfig.BadgerDir, defaultConfig.BadgerValueDir)
+	err = badger.InitDB(config.BadgerDir, config.BadgerValueDir)
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
 		return err
@@ -83,13 +76,23 @@ func Init() error {
 	return nil
 }
 
-//Serve
-func (s *Server) Serve() error {
-	s.rpcServer = NewRpcServer(defaultConfig.ListenAddr)
+type Server struct {
+	//rpc server
+	rpcServer *gorpc.Server
+}
+
+//Start
+func (s *Server) Start(addr string) error {
+	s.rpcServer = NewRpcServer(addr)
 	err := s.rpcServer.Start()
 	if err != nil {
 		defaultLogger.Error("server", err, "", "")
 		return err
 	}
 	return nil
+}
+
+//Stop
+func (s *Server) Stop() {
+	defaultServer.rpcServer.Stop()
 }
