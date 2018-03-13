@@ -1,8 +1,6 @@
 package tdns
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 
 	hlog "github.com/haxii/log"
@@ -27,16 +25,12 @@ type Server struct {
 }
 
 //Serve init server and listen on addr
-func Serve(config string) error {
-	buf, err := ioutil.ReadFile(config)
+func Serve(configFile string) error {
+	config, err := LoadConfig(configFile)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defaultConfig = &Config{}
-	err = json.Unmarshal(buf, defaultConfig)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	defaultConfig = config
 	defaultServer = &Server{}
 	defaultServer.Init()
 

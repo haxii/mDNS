@@ -52,22 +52,28 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 	//get ips from db
 	ipskey := getHostIPsKey(req.Host, countryCode)
 	bs, err := badger.Get(ipskey)
+	if err != nil && err.Error() != "Key not found" {
+		defaultLogger.Error("rcp", err, "", "")
+		return nil, err
+	}
 	if bs != nil {
 		ips := make([]net.IPAddr, 1)
 		err = json.Unmarshal(bs, &ips)
 		if err != nil {
+			defaultLogger.Error("rcp", err, "", "")
 			return nil, err
 		}
-		return ips, err
+		return ips, nil
 	}
 
-	// resove dns via proxy
+	// resolve dns via proxy
 	client := defaultProxyMng.GetProxyClient(countryCode)
 	if client == nil {
 		return nil, errors.New(fmt.Sprintf("not found socks for country(%s)", countryCode))
 	}
 	ips, err := client.ResoveDNS(req.Host, DNSServer)
 	if err != nil {
+		defaultLogger.Error("rcp", err, "", "")
 		return nil, err
 	}
 
@@ -82,6 +88,7 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 		bs, err := json.Marshal(ips)
 		if err != nil {
 			defaultLogger.Error("rpc", err, "", "")
+			return
 		}
 		err = badger.SetWithTTL(ipskey, bs, ipsTTL)
 		if err != nil {
