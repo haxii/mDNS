@@ -3,7 +3,6 @@ package tdns
 import (
 	hlog "github.com/haxii/log"
 	"github.com/haxii/tdns/db/badger"
-	"github.com/haxii/tdns/db/geoip"
 	"github.com/haxii/tdns/proxy"
 	"github.com/valyala/gorpc"
 )
@@ -38,7 +37,6 @@ func Serve(configFile string) error {
 // StopServer stops rpc server, closes db connect, resets proxy manager
 func StopServer() {
 	defaultRpcServer.Stop()
-	geoip.CloseDB()
 	badger.CloseDB()
 	defaultProxyMng.Reset()
 	defaultProxyMng = nil
@@ -54,13 +52,6 @@ func InitServer(config *Config) error {
 	var err error
 	defaultLogger, err = hlog.MakeZeroLogger(false, config.LogDir, "tdns")
 	if err != nil {
-		return err
-	}
-
-	// init geoip db
-	err = geoip.InitDB(config.IPDB)
-	if err != nil {
-		defaultLogger.Error("server", err, "", "")
 		return err
 	}
 

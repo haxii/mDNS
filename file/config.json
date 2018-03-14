@@ -3,8 +3,6 @@
 
     "DNSServer": "8.8.8.8:53",              "//": "dns server addr",
 
-    "IPDB": "./file/GeoLite2-Country.mmdb", "//": "geoip db file",
-
     "BadgerDir": "./badger",                "//": "dir to store badger  data",
 
     "BadgerValueDir": "./badger",           "//": "dir to stroe badger value log in",

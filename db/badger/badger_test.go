@@ -1,6 +1,7 @@
 package badger
 
 import (
+	"bytes"
 	"os"
 	"testing"
 	"time"
@@ -8,6 +9,9 @@ import (
 
 var (
 	badgerDir = "./badger"
+
+	testKey   = "testKey"
+	testValue = "testValue"
 )
 
 func TestBadger(t *testing.T) {
@@ -15,6 +19,7 @@ func TestBadger(t *testing.T) {
 	t.Run("testSet", testSet)
 	t.Run("testGet", testGet)
 	t.Run("testSetWithTTL", testSetWithTTL)
+	t.Run("testCloseDB", testCloseDB)
 
 	os.RemoveAll(badgerDir)
 }
@@ -40,38 +45,38 @@ func testCloseDB(t *testing.T) {
 }
 
 func testSet(t *testing.T) {
-	err := Set([]byte("test_"), []byte("value_"))
+	err := Set(testKey, testValue)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func testGet(t *testing.T) {
-	val, err := Get([]byte("test_"))
+	val, err := Get(testKey)
 	if err != nil {
 		t.Error(err)
 	}
-	if string(val) != "value_" {
+	if bytes.Equal(val, testValue) {
 		t.Fail()
 	}
 }
 
 func testSetWithTTL(t *testing.T) {
-	err := SetWithTTL([]byte("test_"), []byte("value_"), time.Second)
+	err := SetWithTTL(testKey, testValue, time.Second)
 	if err != nil {
 		t.Error(err)
 	}
 
-	val, err := Get([]byte("test_"))
+	val, err := Get(testKey)
 	if err != nil {
 		t.Error(err)
 	}
-	if string(val) != "value_" {
+	if bytes.Equal(val, testValue) {
 		t.Fail()
 	}
 
 	time.Sleep(time.Second)
-	val, _ = Get([]byte("test_"))
+	val, _ = Get(testKey)
 	if len(val) > 0 {
 		t.Fail()
 	}

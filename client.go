@@ -38,9 +38,9 @@ func (c *Client) Close() {
 
 // LookupIPAddr calls "LookupIPAddr" rpc
 // LookupIPAddr returns IPAddr slice and err
-func (c *Client) LookupIPAddr(ip, domain string) ([]net.IPAddr, error) {
+func (c *Client) LookupIPAddr(code, domain string) ([]net.IPAddr, error) {
 	req := &LookupIPRequest{
-		IP:   ip,
+		Code: code,
 		Host: domain,
 	}
 	resp, err := c.dc.Call("LookupIPAddr", req)

@@ -9,10 +9,10 @@ import (
 )
 
 var (
-	rpc    = flag.String("rpc", "127.0.0.1:8090", "rpc server addr")
-	host   = flag.String("host", "", "host to resolve")
-	peerIP = flag.String("peerIP", "61.135.169.125", "peer ip")
-	help   = flag.Bool("h", false, "help usage")
+	rpc  = flag.String("rpc", "127.0.0.1:8090", "rpc server addr")
+	host = flag.String("host", "", "host to resolve")
+	code = flag.String("code", "CN", "country code")
+	help = flag.Bool("h", false, "help usage")
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	c := tdns.ConnectClient(*rpc)
 	defer c.Close()
 
-	res, err := c.LookupIPAddr(*peerIP, *host)
+	res, err := c.LookupIPAddr(*code, *host)
 	if err != nil {
 		log.Fatalln(err)
 	}

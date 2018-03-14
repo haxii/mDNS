@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/haxii/tdns/db/badger"
-	"github.com/haxii/tdns/db/geoip"
 	"github.com/haxii/tdns/proxy"
 	"github.com/valyala/gorpc"
 )
@@ -28,7 +27,7 @@ func NewRpcServer(addr string) *gorpc.Server {
 }
 
 type LookupIPRequest struct {
-	IP   string
+	Code string
 	Host string
 }
 
@@ -43,15 +42,11 @@ type SetProxyRequest struct {
 // LookupIPAddrs rpc function
 // LookupIPAddrs returns ip slice and error if any
 func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
-	if len(req.IP) == 0 || len(req.Host) == 0 {
+	if len(req.Code) == 0 || len(req.Host) == 0 {
 		return nil, errors.New("ip or host is empty")
 	}
-	countryCode, err := geoip.CountryCode(req.IP)
-	if err != nil {
-		return nil, err
-	}
 	//get ips from db
-	ipskey := getHostIPsKey(req.Host, countryCode)
+	ipskey := getHostIPsKey(req.Host, req.Code)
 	bs, err := badger.Get(ipskey)
 	if err != nil && err.Error() != "Key not found" {
 		defaultLogger.Error("rcp", err, "", "")
@@ -68,9 +63,9 @@ func LookupIPAddrs(req *LookupIPRequest) ([]net.IPAddr, error) {
 	}
 
 	// resolve dns via proxy
-	client := defaultProxyMng.GetProxyClient(countryCode)
+	client := defaultProxyMng.GetProxyClient(req.Code)
 	if client == nil {
-		return nil, errors.New(fmt.Sprintf("not found socks for country(%s)", countryCode))
+		return nil, errors.New(fmt.Sprintf("not found socks for country(%s)", req.Code))
 	}
 	ips, err := client.ResoveDNS(req.Host, DNSServer)
 	if err != nil {
