@@ -10,8 +10,8 @@ import (
 var (
 	badgerDir = "./badger"
 
-	testKey   = "testKey"
-	testValue = "testValue"
+	testKey   = []byte("testKey")
+	testValue = []byte("testValue")
 )
 
 func TestBadger(t *testing.T) {
@@ -56,7 +56,7 @@ func testGet(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if bytes.Equal(val, testValue) {
+	if !bytes.Equal(val, testValue) {
 		t.Fail()
 	}
 }
@@ -71,7 +71,7 @@ func testSetWithTTL(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if bytes.Equal(val, testValue) {
+	if !bytes.Equal(val, testValue) {
 		t.Fail()
 	}
 
