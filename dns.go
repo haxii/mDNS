@@ -1,4 +1,4 @@
-package dns
+package tdns
 
 import (
 	"errors"
@@ -7,7 +7,8 @@ import (
 	"github.com/miekg/dns"
 )
 
-// LookupIPOnConn sends dns request and parses response
+// LookupIPOnConn
+// send dns request and parse response
 func LookupIPOnConn(conn net.Conn, host string) ([]net.IPAddr, error) {
 	msg := packDnsMsg(host)
 	co := &dns.Conn{Conn: conn}
