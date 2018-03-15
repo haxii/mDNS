@@ -8,14 +8,15 @@ import (
 )
 
 var (
-	badgerDir = "./badger"
+	db        *BadgerDB
+	badgerDir = "./TestBadger"
 
 	testKey   = []byte("testKey")
 	testValue = []byte("testValue")
 )
 
 func TestBadger(t *testing.T) {
-	t.Run("testInitDB", testInitDB)
+	t.Run("testOpenDB", testOpenDB)
 	t.Run("testSet", testSet)
 	t.Run("testGet", testGet)
 	t.Run("testSetWithTTL", testSetWithTTL)
@@ -24,8 +25,9 @@ func TestBadger(t *testing.T) {
 	os.RemoveAll(badgerDir)
 }
 
-func testInitDB(t *testing.T) {
-	err := InitDB(badgerDir, badgerDir)
+func testOpenDB(t *testing.T) {
+	var err error
+	db, err = OpenBadger(badgerDir, badgerDir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,24 +37,24 @@ func testInitDB(t *testing.T) {
 }
 
 func testCloseDB(t *testing.T) {
-	err := CloseDB()
+	err := db.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if db != nil {
+	if db.db != nil {
 		t.Fatal("close db error")
 	}
 }
 
 func testSet(t *testing.T) {
-	err := Set(testKey, testValue)
+	err := db.Set(testKey, testValue)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func testGet(t *testing.T) {
-	val, err := Get(testKey)
+	val, err := db.Get(testKey)
 	if err != nil {
 		t.Error(err)
 	}
@@ -62,12 +64,12 @@ func testGet(t *testing.T) {
 }
 
 func testSetWithTTL(t *testing.T) {
-	err := SetWithTTL(testKey, testValue, time.Second)
+	err := db.SetWithTTL(testKey, testValue, time.Second)
 	if err != nil {
 		t.Error(err)
 	}
 
-	val, err := Get(testKey)
+	val, err := db.Get(testKey)
 	if err != nil {
 		t.Error(err)
 	}
@@ -76,7 +78,7 @@ func testSetWithTTL(t *testing.T) {
 	}
 
 	time.Sleep(time.Second)
-	val, _ = Get(testKey)
+	val, _ = db.Get(testKey)
 	if len(val) > 0 {
 		t.Fail()
 	}
