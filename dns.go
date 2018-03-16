@@ -7,10 +7,9 @@ import (
 	"github.com/miekg/dns"
 )
 
-// LookupIPOnConn
-// send dns request and parse response
+// LookupIPOnConn send dns request and parse response
 func LookupIPOnConn(conn net.Conn, host string) ([]net.IPAddr, error) {
-	msg := packDnsMsg(host)
+	msg := packDNSMsg(host)
 	co := &dns.Conn{Conn: conn}
 	err := co.WriteMsg(msg)
 	if err != nil {
@@ -38,7 +37,7 @@ func LookupIPOnConn(conn net.Conn, host string) ([]net.IPAddr, error) {
 }
 
 // pack dns msg object
-func packDnsMsg(host string) *dns.Msg {
+func packDNSMsg(host string) *dns.Msg {
 	m := &dns.Msg{
 		MsgHdr: dns.MsgHdr{
 			Authoritative:     false,

@@ -21,17 +21,13 @@ type TDNS struct {
 	proxies sync.Map
 }
 
-// SetProxy
-//
-// new a proxy client and store it on proxies
+// SetProxy new a proxy client and store it on proxies
 func (tdns *TDNS) SetProxy(code, addr, user, pwd, dns string, onlyTCP bool) {
 	proxy := NewProxyClient(addr, user, pwd, dns, onlyTCP)
 	tdns.proxies.Store(code, proxy)
 }
 
-// LookupIPAddrs
-//
-// read from cache, if no cache, then resolve it and save in cache async
+// LookupIPAddrs read from cache, if no cache, then resolve it and save in cache async
 func (tdns *TDNS) LookupIPAddrs(code, host string) ([]net.IPAddr, error) {
 	if len(code) == 0 || len(host) == 0 {
 		return nil, errors.New("code or host is empty")

@@ -1,5 +1,5 @@
 {
-    "RpcAddr": "0.0.0.0:8090",                      "//": "listen addr, eg. '0.0.0.0:8080', '127.0.0.1:8080'",
+    "RPCAddr": "0.0.0.0:8090",                      "//": "listen addr, eg. '0.0.0.0:8080', '127.0.0.1:8080'",
 
     "ProxyFile": "/path/of/proxy.json",             "//": "proxy file",
 

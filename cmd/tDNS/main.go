@@ -81,8 +81,8 @@ func serve(configFile string) {
 	}
 
 	// start rcp server
-	rpcServer := NewRpcServer(config.RpcAddr)
-	fmt.Printf("listen rpc on: %s\n", config.RpcAddr)
+	rpcServer := NewRPCServer(config.RPCAddr)
+	fmt.Printf("listen rpc on: %s\n", config.RPCAddr)
 	err = rpcServer.Serve()
 	if err != nil {
 		panic(err)

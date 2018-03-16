@@ -7,6 +7,7 @@ import (
 	socks5 "github.com/nicdex/go-socks5"
 )
 
+//ProxyClient wraps socks client
 type ProxyClient struct {
 	dns                string
 	client             *socks5.Client
@@ -24,9 +25,7 @@ func NewProxyClient(addr, user, pwd, dns string, onlyTCP bool) *ProxyClient {
 	return client
 }
 
-// LookupIPAddrs
-//
-// send dns request, pars response
+// LookupIPAddrs send dns request, pars response
 // return IPAddr slice and error if any
 func (c *ProxyClient) LookupIPAddrs(host string) ([]net.IPAddr, error) {
 	var conn net.Conn

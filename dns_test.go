@@ -36,8 +36,8 @@ func TestLookupIPOnConn(t *testing.T) {
 	}
 }
 
-func TestPackDnsMsg(t *testing.T) {
-	m := packDnsMsg("www.baidu.com")
+func TestPackDNSMsg(t *testing.T) {
+	m := packDNSMsg("www.baidu.com")
 	if m.Id == 0 {
 		t.Fatal("pack dns msg, id is 0")
 	}
