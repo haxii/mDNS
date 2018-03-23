@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	db        *BadgerDB
+	db        *DB
 	badgerDir = "./TestBadger"
 
 	testKey   = []byte("testKey")

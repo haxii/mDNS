@@ -13,9 +13,10 @@ import (
 	"github.com/haxii/tdns/db/badger"
 )
 
+//TDNS tDNS struct
 type TDNS struct {
 	Logger   log.Logger
-	BadgerDB *badger.BadgerDB
+	BadgerDB *badger.DB
 	CacheTTL time.Duration
 
 	proxies sync.Map

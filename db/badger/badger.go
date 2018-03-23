@@ -7,15 +7,17 @@ import (
 )
 
 var (
+	//ErrKeyNotFound means Key not found
 	ErrKeyNotFound = badger.ErrKeyNotFound
 )
 
-type BadgerDB struct {
+//DB badger db
+type DB struct {
 	db *badger.DB
 }
 
-// OpenDB opens badger db
-func OpenBadger(dir, valueDir string) (*BadgerDB, error) {
+// OpenBadger opens badger db
+func OpenBadger(dir, valueDir string) (*DB, error) {
 	opts := badger.DefaultOptions
 	opts.Dir = dir
 	opts.ValueDir = valueDir
@@ -23,33 +25,33 @@ func OpenBadger(dir, valueDir string) (*BadgerDB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &BadgerDB{db: db}, nil
+	return &DB{db: db}, nil
 }
 
 // Close closes db
-func (b *BadgerDB) Close() error {
-	if b.db != nil {
-		err := b.db.Close()
+func (db *DB) Close() error {
+	if db.db != nil {
+		err := db.db.Close()
 		if err != nil {
 			return err
 		}
-		b.db = nil
+		db.db = nil
 	}
 	return nil
 }
 
 // Set sets key, val to db
-func (b *BadgerDB) Set(key, val []byte) error {
-	return b.db.Update(func(txn *badger.Txn) error {
+func (db *DB) Set(key, val []byte) error {
+	return db.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set(key, val)
 		return err
 	})
 }
 
 // Get returns val and error
-func (b *BadgerDB) Get(key []byte) ([]byte, error) {
+func (db *DB) Get(key []byte) ([]byte, error) {
 	var value []byte
-	err := b.db.View(func(txn *badger.Txn) error {
+	err := db.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(key)
 		if err != nil {
 			return err
@@ -65,8 +67,8 @@ func (b *BadgerDB) Get(key []byte) ([]byte, error) {
 }
 
 // SetWithTTL sets key, val to db with ttl
-func (b *BadgerDB) SetWithTTL(key, val []byte, ttl time.Duration) error {
-	return b.db.Update(func(txn *badger.Txn) error {
+func (db *DB) SetWithTTL(key, val []byte, ttl time.Duration) error {
+	return db.db.Update(func(txn *badger.Txn) error {
 		err := txn.SetWithTTL([]byte(key), []byte(val), ttl)
 		return err
 	})
