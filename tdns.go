@@ -63,8 +63,10 @@ func (tdns *TDNS) LookupIPAddrs(code, host string) ([]net.IPAddr, error) {
 		return nil, err
 	}
 
-	// async save data to cache
-	go tdns.saveIPsToCache(cacheKey, ips)
+	if len(ips) > 0 {
+		// async save data to cache
+		go tdns.saveIPsToCache(cacheKey, ips)
+	}
 
 	return ips, err
 }
