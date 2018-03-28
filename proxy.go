@@ -63,7 +63,15 @@ func (c *ProxyClient) LookupIPAddrs(host string) ([]net.IPAddr, error) {
 		return nil, err
 	}
 
-	return ips, nil
+	// just return ipv4
+	ip4s := make([]net.IPAddr, 0, len(ips))
+	for _, ip := range ips {
+		if ip.IP.To4() != nil {
+			ip4s = append(ip4s, ip)
+		}
+	}
+
+	return ip4s, nil
 }
 
 // newSocksClient returns a socksClient
