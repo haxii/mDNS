@@ -18,6 +18,7 @@ var (
 
 var (
 	config  = flag.String("config", "", "server config")
+	front   = flag.Bool("f", false, "run on front")
 	rpc     = flag.String("rpc", "", "rpc addr")
 	resolve = flag.String("resolve", "", "host to resolve")
 	country = flag.String("country", "", "country code")
@@ -38,11 +39,17 @@ func main() {
 		return
 	}
 
-	daemon.Make("-s", "tdns", "tdns daemon service").Run(func() {
+	if *front {
 		if len(*config) > 0 {
 			serve(*config)
 		}
-	})
+	} else {
+		daemon.Make("-s", "tdns", "tdns daemon service").Run(func() {
+			if len(*config) > 0 {
+				serve(*config)
+			}
+		})
+	}
 }
 
 func serve(configFile string) {

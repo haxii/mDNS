@@ -7,11 +7,8 @@ import (
 	"github.com/valyala/gorpc"
 )
 
-// NewRPCServer makes a tcp rpc server
-func NewRPCServer(addr string) *gorpc.Server {
-	d := gorpc.NewDispatcher()
-	d.AddFunc("LookupIPAddr", LookupIPAddrsForServer)
-	return gorpc.NewTCPServer(addr, d.NewHandlerFunc())
+// LookupIPService LookupIP service
+type LookupIPService struct {
 }
 
 type lookupIPRequest struct {
@@ -19,12 +16,20 @@ type lookupIPRequest struct {
 	Host string
 }
 
-// LookupIPAddrsForServer returns ip slice and error if any
-func LookupIPAddrsForServer(req *lookupIPRequest) ([]net.IPAddr, error) {
+//LookupIPAddr returns ip slice and error if any
+func (s *LookupIPService) LookupIPAddr(req *lookupIPRequest) ([]net.IPAddr, error) {
 	if len(req.Code) == 0 || len(req.Host) == 0 {
-		return nil, errors.New("ip or host is empty")
+		return nil, errors.New("code or domain is empty")
 	}
 	return defaultTDNS.LookupIPAddrs(req.Code, req.Host)
+}
+
+// NewRPCServer makes a tcp rpc server
+func NewRPCServer(addr string) *gorpc.Server {
+	d := gorpc.NewDispatcher()
+	service := &LookupIPService{}
+	d.AddService("LookupIPAddr", service)
+	return gorpc.NewTCPServer(addr, d.NewHandlerFunc())
 }
 
 // LookupIPAddrForClient new a tcp client and call rpc
@@ -36,8 +41,7 @@ func LookupIPAddrForClient(rpc, code, domain string) ([]net.IPAddr, error) {
 	defer rpcClient.Stop()
 
 	d := gorpc.NewDispatcher()
-	d.AddFunc("LookupIPAddr", LookupIPAddrsForServer)
-	dc := d.NewFuncClient(rpcClient)
+	dc := d.NewServiceClient("LookupIPAddr", rpcClient)
 	req := &lookupIPRequest{
 		Code: code,
 		Host: domain,

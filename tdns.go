@@ -13,9 +13,10 @@ import (
 	"github.com/haxii/tdns/db/badger"
 )
 
+//TDNS tDNS struct
 type TDNS struct {
 	Logger   log.Logger
-	BadgerDB *badger.BadgerDB
+	BadgerDB *badger.DB
 	CacheTTL time.Duration
 
 	proxies sync.Map
@@ -62,8 +63,10 @@ func (tdns *TDNS) LookupIPAddrs(code, host string) ([]net.IPAddr, error) {
 		return nil, err
 	}
 
-	// async save data to cache
-	go tdns.saveIPsToCache(cacheKey, ips)
+	if len(ips) > 0 {
+		// async save data to cache
+		go tdns.saveIPsToCache(cacheKey, ips)
+	}
 
 	return ips, err
 }
