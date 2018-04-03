@@ -12,6 +12,7 @@ type Config struct {
 	BadgerDir      string // dir to store badger data
 	BadgerValueDir string // dir to store badger value log in
 	LogDir         string // dir to save log
+	DefaultCode    string // default code for proxy
 }
 
 // LoadConfig read config file, unmarshal data to config struct

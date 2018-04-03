@@ -21,7 +21,7 @@ func (s *LookupIPService) LookupIPAddr(req *lookupIPRequest) ([]net.IPAddr, erro
 	if len(req.Code) == 0 || len(req.Host) == 0 {
 		return nil, errors.New("code or domain is empty")
 	}
-	return defaultTDNS.LookupIPAddrs(req.Code, req.Host)
+	return defaultTDNS.LookupIPAddrs(req.Code, req.Host, defaultCode)
 }
 
 // NewRPCServer makes a tcp rpc server
@@ -41,6 +41,9 @@ func LookupIPAddrForClient(rpc, code, domain string) ([]net.IPAddr, error) {
 	defer rpcClient.Stop()
 
 	d := gorpc.NewDispatcher()
+	service := &LookupIPService{}
+	d.AddService("LookupIPAddr", service)
+
 	dc := d.NewServiceClient("LookupIPAddr", rpcClient)
 	req := &lookupIPRequest{
 		Code: code,

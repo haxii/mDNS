@@ -29,9 +29,23 @@ func (tdns *TDNS) SetProxy(code, addr, user, pwd, dns string, onlyTCP bool) {
 }
 
 // LookupIPAddrs read from cache, if no cache, then resolve it and save in cache async
-func (tdns *TDNS) LookupIPAddrs(code, host string) ([]net.IPAddr, error) {
+func (tdns *TDNS) LookupIPAddrs(code, host, defaultCode string) ([]net.IPAddr, error) {
 	if len(code) == 0 || len(host) == 0 {
 		return nil, errors.New("code or host is empty")
+	}
+
+	// if no proxy for code, then use defaultCode if not empty
+	value, ok := tdns.proxies.Load(code)
+	if !ok {
+		if len(defaultCode) == 0 {
+			return nil, fmt.Errorf("proxy not found for code(%s)", code)
+		}
+
+		value, ok = tdns.proxies.Load(defaultCode)
+		if !ok {
+			return nil, fmt.Errorf("proxy not found for code(%s)", defaultCode)
+		}
+		code = defaultCode
 	}
 
 	var cacheKey []byte
@@ -53,10 +67,6 @@ func (tdns *TDNS) LookupIPAddrs(code, host string) ([]net.IPAddr, error) {
 	}
 
 	//resolve on proxy
-	value, ok := tdns.proxies.Load(code)
-	if !ok {
-		return nil, errors.New("not found proxy")
-	}
 	proxy := value.(*ProxyClient)
 	ips, err := proxy.LookupIPAddrs(host)
 	if err != nil {

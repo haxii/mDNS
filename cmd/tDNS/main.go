@@ -14,6 +14,7 @@ import (
 var (
 	defaultLogger *log.ZeroLogger
 	defaultTDNS   *tdns.TDNS
+	defaultCode   = "US"
 )
 
 var (
@@ -85,6 +86,10 @@ func serve(configFile string) {
 	for _, proxy := range proxies {
 		defaultTDNS.SetProxy(proxy.Code, proxy.Addr, proxy.User,
 			proxy.Pwd, proxy.DNS, proxy.OnlyTCP)
+	}
+
+	if len(config.DefaultCode) > 0 {
+		defaultCode = config.DefaultCode
 	}
 
 	// start rcp server

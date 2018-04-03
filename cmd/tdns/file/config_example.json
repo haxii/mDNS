@@ -7,5 +7,7 @@
 
     "BadgerValueDir":  "/path/of/badger",           "//": "dir to store badger value log in",
 
-    "LogDir":  "/path/of/log",                      "//": "dir to store log"
+    "LogDir":  "/path/of/log",                     "//": "dir to store log",
+
+    "DefaultCode":  "US",                           "//": "default country code"
 }
