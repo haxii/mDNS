@@ -1,4 +1,2 @@
 cmd/tdns/badger
 cmd/tdns/log
-cmd/tdns/file/config.json
-cmd/tdns/file/proxy.json

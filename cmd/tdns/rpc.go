@@ -21,7 +21,13 @@ func (s *LookupIPService) LookupIPAddr(req *lookupIPRequest) ([]net.IPAddr, erro
 	if len(req.Code) == 0 || len(req.Host) == 0 {
 		return nil, errors.New("code or domain is empty")
 	}
-	return defaultTDNS.LookupIPAddrs(req.Code, req.Host, defaultCode)
+
+	continent := countries[req.Code]
+	if len(continent) == 0 {
+		return nil, errors.New("cant find continent")
+	}
+
+	return defaultTDNS.LookupIPAddrs(continent, req.Host, defaultCode)
 }
 
 // NewRPCServer makes a tcp rpc server

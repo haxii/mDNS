@@ -1,0 +1,15 @@
+{
+    "RPCAddr": "0.0.0.0:8090",                  "//": "listen addr, eg. ':8080', '127.0.0.1:8080'",
+
+    "ProxyFile": "/Users/daizong/workspace/go/src/github.com/haxii/tdns/cmd/tdns/file/proxy_example.json",       "//": "proxy file",
+
+    "BadgerDir": "/Users/daizong/workspace/go/src/github.com/haxii/tdns/cmd/tdns/badger",                "//": "dir to store badger  data",
+
+    "BadgerValueDir": "/Users/daizong/workspace/go/src/github.com/haxii/tdns/cmd/tdns/badger",           "//": "dir to stroe badger value log in",
+
+    "LogDir": "/Users/daizong/workspace/go/src/github.com/haxii/tdns/cmd/tdns/log",                      "//": "dir to store log",
+
+    "DefaultCode": "US",
+
+    "CountryFile": "./file/country.json",         "//": "country file"
+}

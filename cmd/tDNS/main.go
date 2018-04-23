@@ -15,6 +15,7 @@ var (
 	defaultLogger *log.ZeroLogger
 	defaultTDNS   *tdns.TDNS
 	defaultCode   = "US"
+	countries     map[string]string
 )
 
 var (
@@ -90,6 +91,11 @@ func serve(configFile string) {
 
 	if len(config.DefaultCode) > 0 {
 		defaultCode = config.DefaultCode
+	}
+
+	countries, err = LoadCountries(config.CountryFile)
+	if err != nil {
+		panic(err)
 	}
 
 	// start rcp server

@@ -13,6 +13,7 @@ type Config struct {
 	BadgerValueDir string // dir to store badger value log in
 	LogDir         string // dir to save log
 	DefaultCode    string // default code for proxy
+	CountryFile    string // country file
 }
 
 // LoadConfig read config file, unmarshal data to config struct
@@ -53,4 +54,18 @@ func LoadProxies(file string) (map[string]*ProxyInfo, error) {
 		return nil, err
 	}
 	return proxies, nil
+}
+
+// LoadCountries read country file, and unmarshal data
+func LoadCountries(file string) (map[string]string, error) {
+	buf, err := ioutil.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	countries := make(map[string]string)
+	err = json.Unmarshal(buf, &countries)
+	if err != nil {
+		return nil, err
+	}
+	return countries, nil
 }
